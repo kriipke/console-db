@@ -1,4 +1,5 @@
 = CONSOLE DB
+:version: 0.2.0
 
 == Files
 
@@ -14,7 +15,7 @@ Diagram was made using link:https://drawsql.app/teams/techop-1[`drawsql.app`]
 
 https://drawsql.app/teams/techop-1/diagrams/console
 
-image:docs/diagram-latest.png[]
+image:docs/diagram-v{version}.png[]
 
 == Usage
 
