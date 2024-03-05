@@ -47,12 +47,12 @@ CREATE TABLE audit_logs (
     action VARCHAR(255) NOT NULL,
     entity_type VARCHAR(255) NOT NULL,
     entity_id UUID NOT NULL,
-    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp,
     details TEXT, -- JSON or TEXT for change details
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL
 );
 
-  
+
 -- [[ datacenter_configs ]]
 
 CREATE TABLE datacenter_configs (
@@ -63,7 +63,7 @@ CREATE TABLE datacenter_configs (
     server VARCHAR(255),
     insecure BOOLEAN,
     thumbprint TEXT,
-    created_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL
+    created_by_user_id UUID REFERENCES users (id) ON DELETE SET NULL
 );
 
 
@@ -74,7 +74,7 @@ CREATE TABLE cluster_networks (
     cni_plugin VARCHAR(255),
     pods_cr_blocks TEXT,
     services_cr_blocks TEXT,
-    created_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL
+    created_by_user_id UUID REFERENCES users (id) ON DELETE SET NULL
 );
 
 
@@ -108,7 +108,9 @@ CREATE TABLE kubernetes_providers (
     configuration TEXT,
     is_default BOOLEAN DEFAULT FALSE
 );
-INSERT INTO kubernetes_providers (name, version, configuration, is_default) VALUES ('EKS Anywhere', 'DEFAULT_VERSION', '{}', TRUE);
+INSERT INTO kubernetes_providers (
+    name, version, configuration, is_default
+) VALUES ('EKS Anywhere', 'DEFAULT_VERSION', '{}', TRUE);
 
 
 -- [[ s3_storage_backends ]]
@@ -183,19 +185,38 @@ CREATE TABLE tags (
     value VARCHAR(255) NOT NULL
 );
 
--- ENTITY TAGS TABLE: This new table entity_tags is designed to associate tags with various entity types. Each record links a tag (tag_) to an entity (entity_id) and specifies the type of that entity (entity_type). This design allows for the tagging of a wide range
--- POLYMORPHIC ASSOCIATION: The entity_type column specifies the type of the entity being tagged, such as 'clusters' or 'argo_applications', making this a polymorphic association. This approach proves great flexibility, allowing any table/entity to be tagged by si    --
+-- ENTITY TAGS TABLE: This new table entity_tags is designed to associate tags
+--  with various entity types. Each record links a tag (tag_) to an entity (en
+-- tity_id) and specifies the type of that entity (entity_type). This design a
+-- llows for the tagging of a wide range
+--
+-- POLYMORPHIC ASSOCIATION: The entity_type column specifies the type of the e
+-- ntity being tagged, such as 'clusters' or 'argo_applications', making this 
+-- a polymorphic association. This approach proves great flexibility, allowing
+--  any table/entity to be tagged by si    --
 -- Conserations:
--- PERFORMANCE AND INDEXING: As the entity_tags table can grow significantly depending on the usage, conser adding indexes on entity_id, entity_type, and tag_id columns to improve query performance, especially for JOIN operations or when filtering by these columns.
--- DATA INTEGRITY: The polymorphic association does not enforce referential integrity at the database level for the entity_ and entity_type columns, as foreign keys do. Application logic may need to ensure that entity_id and entity_type references are valid.
--- This modification to the database schema enables a highly flexible and extensible tagging system, allowing for the tagging of various entities across the database without creating separate tables for each entity type's tags.
+--
+-- PERFORMANCE AND INDEXING: As the entity_tags table can grow significantly d
+-- epending on the usage, conser adding indexes on entity_id, entity_type, and
+--  tag_id columns to improve query performance, especially for JOIN operation
+-- s or when filtering by these columns.
+--
+-- DATA INTEGRITY: The polymorphic association does not enforce referential in
+-- tegrity at the database level for the entity_ and entity_type columns, as f
+-- oreign keys do. Application logic may need to ensure that entity_id and ent
+-- ity_type references are valid.
+--
+-- This modification to the database schema enables a highly flexible and exte
+-- nsible tagging system, allowing for the tagging of various entities across 
+-- the database without creating separate tables for each entity type's tags.
+--
 CREATE TABLE entity_tags (
 
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tag_id UUID NOT NULL,
     entity_id UUID NOT NULL,
     entity_type VARCHAR(255) NOT NULL,
-    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+    FOREIGN KEY (tag_id) REFERENCES tags (id) ON DELETE CASCADE
 );
 
 
@@ -219,11 +240,19 @@ CREATE TABLE environments (
     container_registry INT,
     gitops_backend INT,
     gitops_backend_id UUID,
-    FOREIGN KEY (s3_storage_backend_id) REFERENCES s3_storage_backends (id) ON DELETE SET NULL,
-    FOREIGN KEY (container_registry_id) REFERENCES container_registries (id) ON DELETE SET NULL,
+    FOREIGN KEY (s3_storage_backend_id) REFERENCES s3_storage_backends (
+        id
+    ) ON DELETE SET NULL,
+    FOREIGN KEY (container_registry_id) REFERENCES container_registries (
+        id
+    ) ON DELETE SET NULL,
     FOREIGN KEY (tier_id) REFERENCES tiers (id) ON DELETE CASCADE,
-    FOREIGN KEY (gitops_backend_id) REFERENCES gitops_backends (id) ON DELETE SET NULL,
-    FOREIGN KEY (container_registry_id) REFERENCES container_registries (id) ON DELETE SET NULL
+    FOREIGN KEY (gitops_backend_id) REFERENCES gitops_backends (
+        id
+    ) ON DELETE SET NULL,
+    FOREIGN KEY (container_registry_id) REFERENCES container_registries (
+        id
+    ) ON DELETE SET NULL
 );
 
 
@@ -242,7 +271,9 @@ CREATE TABLE clusters (
     cluster_type VARCHAR(255) CHECK (cluster_type IN ('management', 'worker')),
     environment_id UUID,
     kubernetes_provider_id UUID,
-    FOREIGN KEY (kubernetes_provider_id) REFERENCES kubernetes_providers(id) ON DELETE SET NULL,
+    FOREIGN KEY (kubernetes_provider_id) REFERENCES kubernetes_providers (
+        id
+    ) ON DELETE SET NULL,
     FOREIGN KEY (datacenter_config_id) REFERENCES datacenter_configs (id),
     FOREIGN KEY (cluster_network_id) REFERENCES cluster_networks (id),
     FOREIGN KEY (control_plane_config_id) REFERENCES machine_configs (id),
@@ -255,9 +286,9 @@ CREATE TABLE clusters (
 
 CREATE TABLE cluster_relationships (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    management_cluster_id UUID,
+    mgmt_cluster_id UUID,
     worker_cluster_id UUID,
-    FOREIGN KEY (management_cluster_id) REFERENCES clusters (id) ON DELETE CASCADE,
+    FOREIGN KEY (mgmt_cluster_id) REFERENCES clusters (id) ON DELETE CASCADE,
     FOREIGN KEY (worker_cluster_id) REFERENCES clusters (id) ON DELETE CASCADE
 );
 
@@ -274,7 +305,7 @@ CREATE TABLE argo_applications (
     target_revision VARCHAR(255),
     project VARCHAR(255),
     sync_policy VARCHAR(255),
-    FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE SET NULL
+    FOREIGN KEY (cluster_id) REFERENCES clusters (id) ON DELETE SET NULL
 );
 
 
@@ -312,4 +343,3 @@ CREATE TABLE argo_deployments (
 
 
 COMMIT;
-
