@@ -1,0 +1,17 @@
+= CONSOLE DB
+
+== Files
+
+Included in this repo are:
+
+. the diagram of the db used for https://github.com/kriipke/console-api
+. an `init.sql` file to create the DB schema using Postgres 14+
+. a `types.go` file that creates the golang GORM `structs` needed to use https://gorm.io/index.html[GORM] with the database described in this repo
+
+== Diagram 
+
+Diagram was made using link:https://drawsql.app/teams/techop-1[`drawsql.app`]
+
+https://drawsql.app/teams/techop-1/diagrams/console
+
+image:docs/diagram-latest.png[]
