@@ -5,7 +5,7 @@ services:
     image: postgres:14-alpine
     volumes:
       - console_db:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      - ./initializedb.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
     environment:
@@ -18,13 +18,12 @@ services:
   pgadmin4:
     image: dpage/pgadmin4
     ports:
-        - 10001:80
+      - 10001:80
     environment:
-        - PGADMIN_DEFAULT_EMAIL=user@domain.com
-        - PGADMIN_DEFAULT_PASSWORD=SuperSecret
-        - PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION=True
-        - PGADMIN_CONFIG_LOGIN_BANNER=Authorised users only!
-        - PGADMIN_CONFIG_CONSOLE_LOG_LEVEL=10
+      - PGADMIN_DEFAULT_EMAIL=admin@console-db.com
+      - PGADMIN_DEFAULT_PASSWORD=password
+      - PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION=True
+      - PGADMIN_CONFIG_CONSOLE_LOG_LEVEL=10
   # api:
   #   container_name: console-api
   #   build:
