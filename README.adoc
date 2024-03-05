@@ -15,3 +15,54 @@ Diagram was made using link:https://drawsql.app/teams/techop-1[`drawsql.app`]
 https://drawsql.app/teams/techop-1/diagrams/console
 
 image:docs/diagram-latest.png[]
+
+== Usage
+
+=== 1. Enable UUIDs in Postgres
+
+You must run the following SQL command in Postgres before you are able to use the UUID datatype leveraged in this database configuration. 
+
+  CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+=== 2. Run the `init.sql` file in a new Postgres container
+
+
+[source, bash]
+----
+docker run \
+	-v "./init.sql:/docker-entrypoint-initdb.d/init.sql" \ <1>
+	-v postgres_data:/var/lib/postgres 
+	-p "5432:5432" \
+	-d postgres:18-alpine
+----
+<1> This line initalizes the database with the correct schema.
+
+
+=== 3. Run the `docker-compose.yml` to start using db
+
+[source, yaml]
+----
+		version: '3.9'
+
+		services:
+
+			db:
+				image: postgres
+				restart: always
+				# set shared memory limit when using docker-compose
+				shm_size: 128mb
+				# or set shared memory limit when deploy via swarm stack
+				#volumes:
+				#  - type: tmpfs
+				#    target: /dev/shm
+				#    tmpfs:
+				#      size: 134217728 # 128*2^20 bytes = 128Mb
+				environment:
+					POSTGRES_PASSWORD: example
+
+			adminer:
+				image: adminer
+				restart: always
+				ports:
+					- 8080:8080
+----

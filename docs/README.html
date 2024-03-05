@@ -477,10 +477,75 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_usage">Usage</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_1_enable_uuids_in_postgres">1. Enable UUIDs in Postgres</h3>
+<div class="paragraph">
+<p>You must run the following SQL command in Postgres before you are able to use the UUID datatype leveraged in this database configuration.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>CREATE EXTENSION IF NOT EXISTS "uuid-ossp";</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_2_run_the_init_sql_file_in_a_new_postgres_container">2. Run the <code>init.sql</code> file in a new Postgres container</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">docker run \
+	-v "./init.sql:/docker-entrypoint-initdb.d/init.sql" \ <b class="conum">(1)</b>
+	-v postgres_data:/var/lib/postgres
+	-p "5432:5432" \
+	-d postgres:18-alpine</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>This line initalizes the database with the correct schema.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_3_run_the_docker_compose_yml_to_start_using_db">3. Run the <code>docker-compose.yml</code> to start using db</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">		version: '3.9'
+
+		services:
+
+			db:
+				image: postgres
+				restart: always
+				# set shared memory limit when using docker-compose
+				shm_size: 128mb
+				# or set shared memory limit when deploy via swarm stack
+				#volumes:
+				#  - type: tmpfs
+				#    target: /dev/shm
+				#    tmpfs:
+				#      size: 134217728 # 128*2^20 bytes = 128Mb
+				environment:
+					POSTGRES_PASSWORD: example
+
+			adminer:
+				image: adminer
+				restart: always
+				ports:
+					- 8080:8080</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-03-04 23:56:28 -0500
+Last updated 2024-03-05 03:01:53 -0500
 </div>
 </div>
 </body>
